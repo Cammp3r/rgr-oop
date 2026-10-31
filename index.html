@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Обробка табличних даних - Варіант 2</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header class="app-header">
+        <nav class="menu-bar">
+            <div class="menu-item">
+                <span class="menu-title">Файл</span>
+                <div class="dropdown-content">
+                    <label for="file-open" class="dropdown-btn">Відкрити...</label>
+                    <input type="file" id="file-open" accept=".txt" style="display: none;">
+                    <button id="file-save" class="dropdown-btn">Записати</button>
+                    <button id="file-save-as" class="dropdown-btn">Записати як...</button>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <span class="menu-title">Редагування</span>
+                <div class="dropdown-content">
+                    <button id="btn-undo" class="dropdown-btn">Відміна (Ctrl+Z)</button>
+                </div>
+            </div>
+
+            <div class="menu-item">
+                <span class="menu-title">Довідка</span>
+                <div class="dropdown-content">
+                    <button id="btn-about" class="dropdown-btn">Про програму</button>
+                </div>
+            </div>
+        </nav>
+        <div class="file-status" id="file-status">Файл: Не обрано</div>
+    </header>
+
+    <main class="main-content">
+        <div id="table-container" class="table-container">
+            <div class="placeholder-text">Відкрийте текстовий файл (.txt) у форматі Delimited ASCII для відображення таблиці</div>
+        </div>
+    </main>
+
+    <footer class="app-footer">
+        <span>Статус: Готово</span>
+        <span>Натисніть комірку для редагування (Enter - зберегти, Esc - скасувати)</span>
+    </footer>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>
