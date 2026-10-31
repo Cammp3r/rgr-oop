@@ -111,12 +111,34 @@ fileInput.addEventListener('change', (event) => {
 });
 
 btnSave.addEventListener('click', () => saveFile(currentFileName));
-btnSaveAs.addEventListener('click', () => {
-    const newName = prompt('1.txt', currentFileName);
-    if (newName) {
-        currentFileName = newName;
+btnSaveAs.addEventListener('click', async () => {
+    if (!window.showSaveFilePicker) {
+        const newName = prompt('Введіть назву файлу:', currentFileName);
+        if (newName) {
+            currentFileName = newName;
+            fileStatus.textContent = `Файл: ${currentFileName}`;
+            saveFile(currentFileName);
+        }
+        return;
+    }
+
+    try {
+        const fileHandle = await window.showSaveFilePicker({
+            suggestedName: currentFileName,
+            types: [{
+                description: 'Текстові файли',
+                accept: { 'text/plain': ['.txt'] }
+            }]
+        });
+        const writable = await fileHandle.createWritable();
+        await writable.write(myTable.saveToText());
+        await writable.close();
+        currentFileName = fileHandle.name;
         fileStatus.textContent = `Файл: ${currentFileName}`;
-        saveFile(currentFileName);
+    } catch (error) {
+        if (error.name !== 'AbortError') {
+            alert(`Не вдалося зберегти файл: ${error.message}`);
+        }
     }
 });
 
