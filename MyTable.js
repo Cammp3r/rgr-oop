@@ -1,9 +1,11 @@
+const HISTORY_LIMIT = 100;
+
 export class MyTableClass {
+   
     constructor() {
         this.headers = [];
         this.rows = [];
         this.history = [];
-        this.historyLimit = 100;
     }
 
     loadFromText(textData) {
@@ -25,7 +27,7 @@ export class MyTableClass {
         const oldValue = this.rows[rowIndex][colIndex];
         if (oldValue !== newValue) {
             this.history.push({ rowIndex, colIndex, oldValue });
-            if (this.history.length > this.historyLimit) {
+            if (this.history.length > HISTORY_LIMIT) {
                 this.history.shift();
             }
             this.rows[rowIndex][colIndex] = newValue;
