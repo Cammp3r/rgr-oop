@@ -10,6 +10,14 @@ const btnUndo = document.getElementById('btn-undo');
 const btnAbout = document.getElementById('btn-about');
 
 let currentFileName = 'mytable.txt';
+let hasUnsavedChanges = false;
+
+function updateFileStatus() {
+    fileStatus.textContent = hasUnsavedChanges
+        ? `Незбережено: ${currentFileName}`
+        : `Файл: ${currentFileName}`;
+    fileStatus.classList.toggle('unsaved', hasUnsavedChanges);
+}
 
 function renderTable() {
     if (myTable.headers.length === 0) {
@@ -62,7 +70,12 @@ function openCellEditor(td, rowIndex, colIndex) {
     const saveEdit = () => {
         if (!saved) {
             saved = true;
+            const valueChanged = myTable.rows[rowIndex][colIndex] !== input.value;
             myTable.updateCell(rowIndex, colIndex, input.value);
+            if (valueChanged) {
+                hasUnsavedChanges = true;
+                updateFileStatus();
+            }
             renderTable();
         }
     };
@@ -98,26 +111,50 @@ function saveFile(filename) {
 
 fileInput.addEventListener('change', (event) => {
     const file = event.target.files[0];
-    if (file) {
-        currentFileName = file.name;
-        fileStatus.textContent = `Файл: ${currentFileName}`;
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            myTable.loadFromText(e.target.result);
-            renderTable();
-        };
-        reader.readAsText(file);
+    if (!file) {
+        return;
     }
+
+    if (!file.name.toLowerCase().endsWith('.txt')) {
+        alert('Можна відкривати тільки текстові файли з розширенням .txt.');
+        fileInput.value = '';
+        return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        try {
+            myTable.loadFromText(e.target.result);
+            currentFileName = file.name;
+            hasUnsavedChanges = false;
+            updateFileStatus();
+            renderTable();
+        } catch (error) {
+            alert(`Не вдалося обробити файл: ${error.message}`);
+        }
+    };
+    reader.onerror = () => {
+        alert('Не вдалося прочитати файл.');
+    };
+    reader.onabort = () => {
+        alert('Читання файлу було перервано.');
+    };
+    reader.readAsText(file);
 });
 
-btnSave.addEventListener('click', () => saveFile(currentFileName));
+btnSave.addEventListener('click', () => {
+    saveFile(currentFileName);
+    hasUnsavedChanges = false;
+    updateFileStatus();
+});
 btnSaveAs.addEventListener('click', async () => {
     if (!window.showSaveFilePicker) {
         const newName = prompt('Введіть назву файлу:', currentFileName);
         if (newName) {
             currentFileName = newName;
-            fileStatus.textContent = `Файл: ${currentFileName}`;
             saveFile(currentFileName);
+            hasUnsavedChanges = false;
+            updateFileStatus();
         }
         return;
     }
@@ -134,7 +171,8 @@ btnSaveAs.addEventListener('click', async () => {
         await writable.write(myTable.saveToText());
         await writable.close();
         currentFileName = fileHandle.name;
-        fileStatus.textContent = `Файл: ${currentFileName}`;
+        hasUnsavedChanges = false;
+        updateFileStatus();
     } catch (error) {
         if (error.name !== 'AbortError') {
             alert(`Не вдалося зберегти файл: ${error.message}`);
@@ -144,6 +182,8 @@ btnSaveAs.addEventListener('click', async () => {
 
 btnUndo.addEventListener('click', () => {
     if (myTable.undoLastOperation()) {
+        hasUnsavedChanges = true;
+        updateFileStatus();
         renderTable();
     }
 });
@@ -156,7 +196,16 @@ document.addEventListener('keydown', (e) => {
     if (e.ctrlKey && e.code === 'KeyZ') {
         e.preventDefault();
         if (myTable.undoLastOperation()) {
+            hasUnsavedChanges = true;
+            updateFileStatus();
             renderTable();
         }
+    }
+});
+
+window.addEventListener('beforeunload', (event) => {
+    if (hasUnsavedChanges) {
+        event.preventDefault();
+        event.returnValue = '';
     }
 });

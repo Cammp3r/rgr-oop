@@ -19,7 +19,7 @@ body {
     background-color: #2b2b2b;
     color: #fff;
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
     align-items: center;
     padding: 0 10px;
     height: 35px;
@@ -80,8 +80,19 @@ body {
 }
 
 .file-status {
+    order: -1;
+    margin-right: 18px;
     font-size: 12px;
     color: #aaa;
+}
+
+.file-status.unsaved {
+    color: #ffd166;
+    font-weight: 700;
+    background-color: #5a4100;
+    border: 1px solid #ffd166;
+    border-radius: 4px;
+    padding: 4px 8px;
 }
 
 .main-content {
