@@ -81,7 +81,16 @@ function openCellEditor(td, rowIndex, colIndex) {
     };
 
     input.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
+        if (e.ctrlKey && e.code === 'KeyS') {
+            e.preventDefault();
+            e.stopPropagation();
+            saveEdit();
+            if (e.shiftKey) {
+                saveFileAs();
+            } else {
+                saveCurrentFile();
+            }
+        } else if (e.key === 'Enter') {
             saveEdit();
         } else if (e.key === 'Escape') {
             saved = true;
@@ -142,12 +151,13 @@ fileInput.addEventListener('change', (event) => {
     reader.readAsText(file);
 });
 
-btnSave.addEventListener('click', () => {
+function saveCurrentFile() {
     saveFile(currentFileName);
     hasUnsavedChanges = false;
     updateFileStatus();
-});
-btnSaveAs.addEventListener('click', async () => {
+}
+
+async function saveFileAs() {
     if (!window.showSaveFilePicker) {
         const newName = prompt('Введіть назву файлу:', currentFileName);
         if (newName) {
@@ -178,7 +188,10 @@ btnSaveAs.addEventListener('click', async () => {
             alert(`Не вдалося зберегти файл: ${error.message}`);
         }
     }
-});
+}
+
+btnSave.addEventListener('click', saveCurrentFile);
+btnSaveAs.addEventListener('click', saveFileAs);
 
 btnUndo.addEventListener('click', () => {
     if (myTable.undoLastOperation()) {
@@ -200,6 +213,19 @@ document.addEventListener('keydown', (e) => {
             updateFileStatus();
             renderTable();
         }
+    } else if (e.ctrlKey && e.code === 'KeyY') {
+        e.preventDefault();
+        if (myTable.redoLastOperation()) {
+            hasUnsavedChanges = true;
+            updateFileStatus();
+            renderTable();
+        }
+    } else if (e.ctrlKey && e.shiftKey && e.code === 'KeyS') {
+        e.preventDefault();
+        saveFileAs();
+    } else if (e.ctrlKey && e.code === 'KeyS') {
+        e.preventDefault();
+        saveCurrentFile();
     }
 });
 
